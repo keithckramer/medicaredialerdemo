@@ -1,4 +1,5 @@
 // src/pages/AgentCallPage.tsx
+import Grid from '@mui/material/GridLegacy'
 import { useEffect, useState } from 'react'
 import {
   Box,
@@ -9,9 +10,10 @@ import {
   Typography,
   Tabs,
   Tab,
-  Grid,
   TextField,
 } from '@mui/material'
+import { useAgentStore } from '../context/AgentStore'
+import type { AgentStatus } from '../data/mockAgents'
 
 type CallStatus = 'IDLE' | 'DIALING' | 'IN_CALL' | 'HOLD' | 'WRAPUP'
 
@@ -44,6 +46,28 @@ export default function AgentCallPage() {
   const [callStatus, setCallStatus] = useState<CallStatus>('IDLE')
   const [callSeconds, setCallSeconds] = useState(0)
   const [tab, setTab] = useState(0)
+  const agentExtension = '101'
+  const { setAgentStatus } = useAgentStore()
+
+  function mapCallStatusToAgentStatus(callStatus: CallStatus): AgentStatus {
+    switch (callStatus) {
+      case 'IN_CALL':
+        return 'IN_CALL'
+      case 'HOLD':
+        return 'PAUSED'
+      case 'WRAPUP':
+        return 'DISPO'
+      case 'IDLE':
+      case 'DIALING':
+      default:
+        return 'READY'
+    }
+  }
+
+  const setStatus = (next: CallStatus) => {
+    setCallStatus(next)
+    setAgentStatus(agentExtension, mapCallStatusToAgentStatus(next))
+  }
 
   // Simple timer: only runs while IN_CALL
   useEffect(() => {
@@ -58,20 +82,20 @@ export default function AgentCallPage() {
 
   const handleStartCall = () => {
     setCallSeconds(0)
-    setCallStatus('IN_CALL')
+    setStatus('IN_CALL')
   }
 
   const handleHangup = () => {
-    setCallStatus('WRAPUP')
+    setStatus('WRAPUP')
   }
 
   const handleWrapup = () => {
-    setCallStatus('IDLE')
+    setStatus('IDLE')
     setCallSeconds(0)
   }
 
   const handleHold = () => {
-    setCallStatus((prev) => (prev === 'HOLD' ? 'IN_CALL' : 'HOLD'))
+    setStatus(callStatus === 'HOLD' ? 'IN_CALL' : 'HOLD')
   }
 
   const statusColor: Record<CallStatus, 'default' | 'success' | 'warning' | 'error' | 'info'> = {

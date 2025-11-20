@@ -17,18 +17,8 @@ import {
   TableCell,
 } from '@mui/material'
 import { useState } from 'react'
-import { mockAgents, type AgentStatus } from '../data/mockAgents'
-
-const metrics = {
-  totalCallsPlaced: 91,
-  callsRinging: 21,
-  agentsLoggedIn: 43,
-  agentsWaiting: 6,
-  agentsInCall: 31,
-  agentsInDispo: 5,
-  agentsPaused: 1,
-  agentsInDeadCall: 0,
-}
+import { useAgentStore } from '../context/AgentStore'
+import type { AgentStatus } from '../data/mockAgents'
 
 const statusColors: Record<AgentStatus, string> = {
   READY: '#4FC3F7',
@@ -44,6 +34,19 @@ export default function AgentMonitorPage() {
   const [refreshRate, setRefreshRate] = useState<'stop' | 'slow' | 'fast'>(
     'fast',
   )
+  const { agents } = useAgentStore()
+
+  const countByStatus = (status: AgentStatus) =>
+    agents.filter((a) => a.status === status).length
+
+  const agentMetrics = {
+    agentsLoggedIn: agents.length,
+    agentsWaiting: countByStatus('READY'),
+    agentsInCall: countByStatus('IN_CALL'),
+    agentsInDispo: countByStatus('DISPO'),
+    agentsPaused: countByStatus('PAUSED'),
+    agentsInDeadCall: countByStatus('DEAD'),
+  }
 
   return (
     <Box>
@@ -106,7 +109,7 @@ export default function AgentMonitorPage() {
         <Grid item xs={12} sm={4} md={2}>
           <Paper sx={{ p: 2, bgcolor: '#757575', color: 'white' }}>
             <Typography variant="h3" align="center">
-              {metrics.agentsLoggedIn}
+              {agentMetrics.agentsLoggedIn}
             </Typography>
             <Typography align="center">Agents Logged In</Typography>
           </Paper>
@@ -114,7 +117,7 @@ export default function AgentMonitorPage() {
         <Grid item xs={12} sm={4} md={2}>
           <Paper sx={{ p: 2, bgcolor: '#29b6f6', color: 'white' }}>
             <Typography variant="h3" align="center">
-              {metrics.agentsWaiting}
+              {agentMetrics.agentsWaiting}
             </Typography>
             <Typography align="center">Agents Waiting</Typography>
           </Paper>
@@ -122,7 +125,7 @@ export default function AgentMonitorPage() {
         <Grid item xs={12} sm={4} md={2}>
           <Paper sx={{ p: 2, bgcolor: '#66bb6a', color: 'white' }}>
             <Typography variant="h3" align="center">
-              {metrics.agentsInCall}
+              {agentMetrics.agentsInCall}
             </Typography>
             <Typography align="center">Agents In Call</Typography>
           </Paper>
@@ -130,7 +133,7 @@ export default function AgentMonitorPage() {
         <Grid item xs={12} sm={4} md={2}>
           <Paper sx={{ p: 2, bgcolor: '#ffee58', color: 'black' }}>
             <Typography variant="h3" align="center">
-              {metrics.agentsInDispo}
+              {agentMetrics.agentsInDispo}
             </Typography>
             <Typography align="center">Agents In Dispo</Typography>
           </Paper>
@@ -138,7 +141,7 @@ export default function AgentMonitorPage() {
         <Grid item xs={12} sm={4} md={2}>
           <Paper sx={{ p: 2, bgcolor: '#ffb74d', color: 'black' }}>
             <Typography variant="h3" align="center">
-              {metrics.agentsPaused}
+              {agentMetrics.agentsPaused}
             </Typography>
             <Typography align="center">Agents Paused</Typography>
           </Paper>
@@ -146,7 +149,7 @@ export default function AgentMonitorPage() {
         <Grid item xs={12} sm={4} md={2}>
           <Paper sx={{ p: 2, bgcolor: '#e57373', color: 'white' }}>
             <Typography variant="h3" align="center">
-              {metrics.agentsInDeadCall}
+              {agentMetrics.agentsInDeadCall}
             </Typography>
             <Typography align="center">Agents In Dead Call</Typography>
           </Paper>
@@ -172,7 +175,7 @@ export default function AgentMonitorPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {mockAgents.map(agent => (
+            {agents.map((agent) => (
               <TableRow
                 key={agent.extension}
                 sx={{ backgroundColor: statusColors[agent.status] }}
