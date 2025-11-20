@@ -1,31 +1,17 @@
-import { useMemo, useState } from 'react'
-import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk'
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
-import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
-import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
 import Grid from '@mui/material/GridLegacy'
 import {
   Box,
-  Button,
-  ButtonGroup,
+  Paper,
+  Typography,
+  Stack,
   FormControl,
   InputLabel,
-  MenuItem,
-  Paper,
   Select,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
+  MenuItem,
+  Button,
+  ButtonGroup,
 } from '@mui/material'
-import type { SelectChangeEvent } from '@mui/material'
-import { mockAgents, type AgentRow, type AgentStatus } from '../data/mockAgents'
+import { useState } from 'react'
 
 const metrics = {
   totalCallsPlaced: 91,
@@ -39,228 +25,119 @@ const metrics = {
 }
 
 export default function AgentMonitorPage() {
-  const [campaign, setCampaign] = useState('all')
-  const [queue, setQueue] = useState('all')
-  const [refreshRate, setRefreshRate] = useState('fast')
-
-  const statusColors: Record<AgentStatus, string> = useMemo(
-    () => ({
-      READY: '#4FC3F7',
-      IN_CALL: '#81C784',
-      DISPO: '#FFF176',
-      PAUSED: '#FFB74D',
-      DEAD: '#E57373',
-    }),
-    [],
+  const [campaign, setCampaign] = useState('All Campaigns')
+  const [queue, setQueue] = useState('All Queues')
+  const [refreshRate, setRefreshRate] = useState<'stop' | 'slow' | 'fast'>(
+    'fast',
   )
-
-  const legendItems: { label: string; color: string }[] = useMemo(
-    () => [
-      { label: 'PREVIEW', color: '#B39DDB' },
-      { label: 'READY', color: statusColors.READY },
-      { label: 'IN CALL', color: statusColors.IN_CALL },
-      { label: 'DISPO', color: statusColors.DISPO },
-      { label: 'PAUSED', color: statusColors.PAUSED },
-      { label: 'DEAD', color: statusColors.DEAD },
-      { label: 'TIMEOUT', color: '#90A4AE' },
-    ],
-    [statusColors],
-  )
-
-  const handleCampaignChange = (event: SelectChangeEvent) => {
-    setCampaign(event.target.value)
-  }
-
-  const handleQueueChange = (event: SelectChangeEvent) => {
-    setQueue(event.target.value)
-  }
-
-  const kpiTiles = [
-    {
-      label: 'Agents Logged In',
-      value: metrics.agentsLoggedIn,
-      icon: <PeopleAltOutlinedIcon sx={{ fontSize: 40 }} />,
-      color: 'primary.main',
-    },
-    {
-      label: 'Waiting',
-      value: metrics.agentsWaiting,
-      icon: <AccessTimeIcon sx={{ fontSize: 40 }} />,
-      color: 'warning.main',
-    },
-    {
-      label: 'In Call',
-      value: metrics.agentsInCall,
-      icon: <PhoneInTalkIcon sx={{ fontSize: 40 }} />,
-      color: 'success.main',
-    },
-    {
-      label: 'In Dispo',
-      value: metrics.agentsInDispo,
-      icon: <AssignmentTurnedInIcon sx={{ fontSize: 40 }} />,
-      color: 'info.main',
-    },
-    {
-      label: 'Paused',
-      value: metrics.agentsPaused,
-      icon: <PauseCircleOutlineIcon sx={{ fontSize: 40 }} />,
-      color: 'secondary.main',
-    },
-    {
-      label: 'Dead',
-      value: metrics.agentsInDeadCall,
-      icon: <ReportProblemOutlinedIcon sx={{ fontSize: 40 }} />,
-      color: 'error.main',
-    },
-  ]
 
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4" component="h1">
-        Agent Monitor
-      </Typography>
+    <Box>
+      {/* Filters */}
+      <Stack direction="row" spacing={2} mb={3} alignItems="center">
+        <FormControl size="small">
+          <InputLabel>Campaign</InputLabel>
+          <Select
+            label="Campaign"
+            value={campaign}
+            onChange={e => setCampaign(e.target.value)}
+            sx={{ minWidth: 180 }}
+          >
+            <MenuItem value="All Campaigns">All Campaigns</MenuItem>
+            <MenuItem value="Sample Campaign">Sample Campaign</MenuItem>
+          </Select>
+        </FormControl>
 
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} md={3}>
-          <FormControl fullWidth>
-            <InputLabel id="campaign-label">Campaign</InputLabel>
-            <Select
-              labelId="campaign-label"
-              id="campaign-select"
-              label="Campaign"
-              value={campaign}
-              onChange={handleCampaignChange}
+        <FormControl size="small">
+          <InputLabel>Queue</InputLabel>
+          <Select
+            label="Queue"
+            value={queue}
+            onChange={e => setQueue(e.target.value)}
+            sx={{ minWidth: 180 }}
+          >
+            <MenuItem value="All Queues">All Queues</MenuItem>
+            <MenuItem value="Inbound">Inbound</MenuItem>
+            <MenuItem value="Outbound">Outbound</MenuItem>
+          </Select>
+        </FormControl>
+
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body2">Refresh Rate:</Typography>
+          <ButtonGroup size="small">
+            <Button
+              variant={refreshRate === 'stop' ? 'contained' : 'outlined'}
+              onClick={() => setRefreshRate('stop')}
             >
-              <MenuItem value="all">All Campaigns</MenuItem>
-              <MenuItem value="medicare-2025">Medicare 2025</MenuItem>
-              <MenuItem value="follow-up">Follow Up</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <FormControl fullWidth>
-            <InputLabel id="queue-label">Queue</InputLabel>
-            <Select
-              labelId="queue-label"
-              id="queue-select"
-              label="Queue"
-              value={queue}
-              onChange={handleQueueChange}
+              STOP
+            </Button>
+            <Button
+              variant={refreshRate === 'slow' ? 'contained' : 'outlined'}
+              onClick={() => setRefreshRate('slow')}
             >
-              <MenuItem value="all">All Queues</MenuItem>
-              <MenuItem value="priority">Priority</MenuItem>
-              <MenuItem value="standard">Standard</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Stack direction="row" justifyContent="flex-end">
-            <ButtonGroup variant="contained" aria-label="refresh rate">
-              <Button
-                color={refreshRate === 'stop' ? 'primary' : 'inherit'}
-                onClick={() => setRefreshRate('stop')}
-              >
-                STOP
-              </Button>
-              <Button
-                color={refreshRate === 'slow' ? 'primary' : 'inherit'}
-                onClick={() => setRefreshRate('slow')}
-              >
-                SLOW
-              </Button>
-              <Button
-                color={refreshRate === 'fast' ? 'primary' : 'inherit'}
-                onClick={() => setRefreshRate('fast')}
-              >
-                FAST
-              </Button>
-            </ButtonGroup>
-          </Stack>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={2}>
-        {kpiTiles.map((tile) => (
-          <Grid key={tile.label} item xs={12} sm={6} md={4} lg={2}>
-            <Paper
-              elevation={3}
-              sx={{
-                height: '100%',
-                p: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                backgroundColor: tile.color,
-                color: 'common.white',
-              }}
+              SLOW
+            </Button>
+            <Button
+              variant={refreshRate === 'fast' ? 'contained' : 'outlined'}
+              onClick={() => setRefreshRate('fast')}
             >
-              {tile.icon}
-              <Box>
-                <Typography variant="h3" component="div">
-                  {tile.value}
-                </Typography>
-                <Typography variant="subtitle1">{tile.label}</Typography>
-              </Box>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Extension</TableCell>
-              <TableCell>Agent Name</TableCell>
-              <TableCell>Call Type</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Status Time</TableCell>
-              <TableCell>Current Call</TableCell>
-              <TableCell>Ready Time</TableCell>
-              <TableCell>Since Last</TableCell>
-              <TableCell>Total Calls</TableCell>
-              <TableCell>Session</TableCell>
-              <TableCell>Campaign</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {mockAgents.map((agent: AgentRow) => (
-              <TableRow
-                key={agent.extension}
-                sx={{ backgroundColor: statusColors[agent.status] }}
-              >
-                <TableCell>{agent.extension}</TableCell>
-                <TableCell>{agent.name}</TableCell>
-                <TableCell>{agent.callType}</TableCell>
-                <TableCell>{agent.status}</TableCell>
-                <TableCell>{agent.statusTime}</TableCell>
-                <TableCell>{agent.currentCall}</TableCell>
-                <TableCell>{agent.readyTime}</TableCell>
-                <TableCell>{agent.sinceLast}</TableCell>
-                <TableCell>{agent.totalCalls}</TableCell>
-                <TableCell>{agent.session}</TableCell>
-                <TableCell>{agent.campaign}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Paper sx={{ p: 2 }}>
-        <Stack direction="row" flexWrap="wrap" gap={2} alignItems="center">
-          {legendItems.map((item) => (
-            <Stack key={item.label} direction="row" spacing={1} alignItems="center">
-              <Box
-                sx={{ width: 24, height: 24, borderRadius: 1, backgroundColor: item.color }}
-              />
-              <Typography variant="body2">{item.label}</Typography>
-            </Stack>
-          ))}
+              FAST
+            </Button>
+          </ButtonGroup>
         </Stack>
-      </Paper>
-    </Stack>
+      </Stack>
+
+      {/* KPI tiles */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4} md={2}>
+          <Paper sx={{ p: 2, bgcolor: '#757575', color: 'white' }}>
+            <Typography variant="h3" align="center">
+              {metrics.agentsLoggedIn}
+            </Typography>
+            <Typography align="center">Agents Logged In</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4} md={2}>
+          <Paper sx={{ p: 2, bgcolor: '#29b6f6', color: 'white' }}>
+            <Typography variant="h3" align="center">
+              {metrics.agentsWaiting}
+            </Typography>
+            <Typography align="center">Agents Waiting</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4} md={2}>
+          <Paper sx={{ p: 2, bgcolor: '#66bb6a', color: 'white' }}>
+            <Typography variant="h3" align="center">
+              {metrics.agentsInCall}
+            </Typography>
+            <Typography align="center">Agents In Call</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4} md={2}>
+          <Paper sx={{ p: 2, bgcolor: '#ffee58', color: 'black' }}>
+            <Typography variant="h3" align="center">
+              {metrics.agentsInDispo}
+            </Typography>
+            <Typography align="center">Agents In Dispo</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4} md={2}>
+          <Paper sx={{ p: 2, bgcolor: '#ffb74d', color: 'black' }}>
+            <Typography variant="h3" align="center">
+              {metrics.agentsPaused}
+            </Typography>
+            <Typography align="center">Agents Paused</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4} md={2}>
+          <Paper sx={{ p: 2, bgcolor: '#e57373', color: 'white' }}>
+            <Typography variant="h3" align="center">
+              {metrics.agentsInDeadCall}
+            </Typography>
+            <Typography align="center">Agents In Dead Call</Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
