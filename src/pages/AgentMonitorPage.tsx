@@ -10,8 +10,14 @@ import {
   MenuItem,
   Button,
   ButtonGroup,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from '@mui/material'
 import { useState } from 'react'
+import { mockAgents, type AgentStatus } from '../data/mockAgents'
 
 const metrics = {
   totalCallsPlaced: 91,
@@ -22,6 +28,14 @@ const metrics = {
   agentsInDispo: 5,
   agentsPaused: 1,
   agentsInDeadCall: 0,
+}
+
+const statusColors: Record<AgentStatus, string> = {
+  READY: '#4FC3F7',
+  IN_CALL: '#81C784',
+  DISPO: '#FFF176',
+  PAUSED: '#FFB74D',
+  DEAD: '#E57373',
 }
 
 export default function AgentMonitorPage() {
@@ -138,6 +152,47 @@ export default function AgentMonitorPage() {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Agent table */}
+      <Box mt={4}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Ext</TableCell>
+              <TableCell>Agent Name</TableCell>
+              <TableCell>Call Type</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Status Time</TableCell>
+              <TableCell>Current Call</TableCell>
+              <TableCell>Ready Time</TableCell>
+              <TableCell>Since Last</TableCell>
+              <TableCell>Total Calls</TableCell>
+              <TableCell>Session</TableCell>
+              <TableCell>Campaign</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {mockAgents.map(agent => (
+              <TableRow
+                key={agent.extension}
+                sx={{ backgroundColor: statusColors[agent.status] }}
+              >
+                <TableCell>{agent.extension}</TableCell>
+                <TableCell>{agent.name}</TableCell>
+                <TableCell>{agent.callType}</TableCell>
+                <TableCell>{agent.status}</TableCell>
+                <TableCell>{agent.statusTime}</TableCell>
+                <TableCell>{agent.currentCall}</TableCell>
+                <TableCell>{agent.readyTime}</TableCell>
+                <TableCell>{agent.sinceLast}</TableCell>
+                <TableCell>{agent.totalCalls}</TableCell>
+                <TableCell>{agent.session}</TableCell>
+                <TableCell>{agent.campaign}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
     </Box>
   )
 }
